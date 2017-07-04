@@ -28,7 +28,60 @@
 <script>
   const addItems = document.querySelector('.add-items');
   const itemsList = document.querySelector('.plates');
-  const items = [];
+  const items = JSON.parse(localStorage.getItem("items")) || [];
+
+
+
+  function addItem(e) {
+    e.preventDefault();  //stops page from reloading on form submit
+    const text = this.querySelector("[name=item]").value;  //'this' is this form we're calling this function on
+    const item = {
+      text,     //ES 6 for text: text
+      done: false
+    }
+    items.push(item);   //add it to the items array
+    populateList(items, itemsList);
+    localStorage.setItem("items", JSON.stringify(items));   //local storage is just a set of key/value pairs, so turn our array to JSON
+    this.reset();     //again, 'this' is the form element. forms natively have a method called reset to clear the form fields
+  }
+
+
+
+
+
+
+  function populateList(plates = [], platesList) {   //set it to an empty object in case we forget to send something in
+                            //calling it plates and all, in case in the future we want to, say, have a 2nd list and still use this functinality
+    platesList.innerHTML = plates.map((plate, i) => {
+      return `
+        <li>
+          <input type="checkbox" data-index=${i} id="item${i}" ${plate.done ? 'checked' : ''}/>
+          <label for="item${i}">${plate.text}</label>
+        </li>
+      `;
+    }).join('');
+  }
+
+
+  function toggleDone(e) {
+    if(!e.target.matches("input")) return; //skip this unless it's an input that we're clicking on.
+    const el = e.target;
+    const index = el.dataset.index;
+
+    items[index].done = !items[index].done;
+    localStorage.setItem("items", JSON.stringify(items));
+    populateList(items, itemsList);
+  }
+
+
+
+
+  addItems.addEventListener("submit", addItem);
+  itemsList.addEventListener("click", toggleDone);
+
+
+  populateList(items, itemsList);
+
 
 </script>
 
